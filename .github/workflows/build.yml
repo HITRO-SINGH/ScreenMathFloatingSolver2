@@ -3,15 +3,14 @@ name: Build Android APK
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Java
@@ -22,16 +21,14 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Extract project ZIP
+      - name: Extract Android project
         run: |
           rm -rf project
           mkdir project
-          unzip -q ScreenMathFloatingSolver-clean-fixed.zip -d project
+          unzip -q ScreenMathFloatingSolver-clean.zip -d project
 
       - name: Install Gradle 8.7
         run: |
@@ -40,7 +37,7 @@ jobs:
           mkdir -p "$HOME/gradle"
           unzip -q gradle.zip -d "$HOME/gradle"
 
-      - name: Build APK
+      - name: Build debug APK
         run: |
           cd project/ScreenMathFloatingSolver-clean
           "$HOME/gradle/gradle-8.7/bin/gradle" assembleDebug --no-daemon --stacktrace
@@ -51,3 +48,4 @@ jobs:
           name: screen-math-solver-debug-apk
           path: project/ScreenMathFloatingSolver-clean/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          
